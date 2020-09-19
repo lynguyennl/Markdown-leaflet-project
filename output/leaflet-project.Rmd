@@ -1,0 +1,47 @@
+---
+title: "leaflet-project"
+author: "Ly Nguyen"
+date: "9/19/2020"
+output: html_document
+---
+
+## Introduction 
+For this exercise, I would like to create a interactive map of Vietnam's coastal region, which shows Vietnam's 9 coastal provinces. Some of these are popular tourist destinations, this map will indicate some information on these provinces and their tourist arrivals. 
+
+## Load our data 
+```{r echo=TRUE}
+library(readxl)
+setwd("C:/Users/Ly Nguyen/Learning/Courses/John Hopkins - R/9. Developing Data Products/Markdown-leaflet-project")
+tourism <- read_excel("data/tourism.xlsx")
+tourism
+```
+This data set contains names of the 9 coastal provinces, their location, their capital city, their geographical area & lastly, their population. 
+
+## Let's make an interactive map with leaflet 
+```{r echo=TRUE, fig.align='center', fig.height=8, fig.height=8}
+library(leaflet)
+library(sp)
+library(htmltools)
+
+content <- paste0('<strong>Province: </strong>',tourism$Province, '<br><strong>Population (thousands people): </strong>', tourism$Pop_thousand, '<br><strong>Capital City: </strong>', tourism$Capital)
+legText <- paste0('The relative size of the circles<br>on the map shows that for provinces<br>such as <strong>Da Nang, Hue & Khanh Hoa</strong>,<br>the amount of tourists outpaces<br>the area of the province,<br>suggesting a possible overdemand<br>for tourism & strain on the province capacity.<br><br>On the other hand, provinces such as <br><strong>Quang Tri, Quang Ngai & Phu Yen</strong><br>have not become tourist destinations<br>and their potential should not be overlooked.')
+
+myMap <-tourism %>% 
+        leaflet() %>% 
+        addTiles() %>%
+        addLegend(labels=c("Tourist Arrivals (Millions)", "Province Area (thousand ha)"), colors = c("darkslategray","darkred"), values=tourism$`Tourist Arrivals_millions`) %>%
+        addCircles(lng=tourism$Long, lat=tourism$Lat, radius=tourism$`Tourist Arrivals_millions`*8000, color = "darkslategray", weight=2) %>% 
+        addCircles(lng=tourism$Long, lat=tourism$Lat, 
+                         radius=tourism$`Area_ thousand ha`*30, 
+                         label=lapply(content, HTML), 
+                         color="darkred", opacity=0.5, fill=TRUE, weight=2) %>%
+        addPopups(lat=14.399616, lng=111.224435, popup=lapply(legText, HTML), 
+                  options = popupOptions(autoPan=T, closeOnClick = F, closeButton=T))
+myMap
+```
+In the above popup, I explain briefly the insights I got from creating this simple map. 
+
+Enjoy. 
+
+
+
